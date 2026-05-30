@@ -45,3 +45,6 @@ generated
 # temporary files
 tmp
 temp
+
+#TEST.HTTP
+test.http

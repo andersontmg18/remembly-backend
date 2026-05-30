@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+     "ignoreDeprecations": "6.0",
+     
+   "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "target": "ES2017",
     "lib": [
       "dom",

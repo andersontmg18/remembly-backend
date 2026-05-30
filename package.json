@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@prisma/client": "^6.6.0",
+    "bcrypt": "^5.1.1",
     "dotenv": "^17.4.2",
     "next": "^16.2.6",
     "pino": "^10.3.1",
