@@ -30,8 +30,9 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         email: validatedData.email,
-        password: hashedPassword,
-        name: validatedData.name,
+        passwordHash: hashedPassword,
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
       },
     });
 
@@ -41,7 +42,10 @@ export async function POST(request: NextRequest) {
       apiResponse(true, "User registered successfully", {
         id: user.id,
         email: user.email,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isEmailVerified: user.isEmailVerified,
+        role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       }),
