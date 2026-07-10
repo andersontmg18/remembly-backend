@@ -75,21 +75,37 @@ export async function verifyEmailToken(token: string) {
   ]);
 }
 
-export async function sendVerificationEmail(email: string, token: string) {
+export async function sendVerificationEmail(
+  user: { email: string; firstName?: string | null; lastName?: string | null },
+  token: string
+) {
   const baseUrl = env.VERIFICATION_URL || env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const verificationUrl = `${baseUrl.replace(/\/$/, "")}/api/auth/email-verification?token=${token}`;
+  const expiresAt = new Date(Date.now() + VERIFICATION_TOKEN_EXPIRATION_MS);
+  const formattedExpiry = expiresAt.toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+  const greetingName = displayName || user.email.split("@")[0];
   const subject = "Verify your Remembly account";
-  const text = `Please verify your email by visiting this link:\n${verificationUrl}`;
+  const text = `Hi ${greetingName},\n\nPlease verify your email by visiting this link:\n${verificationUrl}\n\nThis link will expire on ${formattedExpiry}.`;
   const html = `
-    <p>Welcome to Remembly!</p>
-    <p>Please verify your email address by clicking the button below:</p>
+    <p>Hi ${greetingName},</p>
+    <p>Welcome to <strong>Remembly</strong>! We’re excited to have you join our community.</p>
+    <p>To activate your account and start using Remembly, please verify your email address by clicking the button below.</p>
     <p><a href="${verificationUrl}" style="padding: 12px 20px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px;">Verify Email</a></p>
-    <p>If the button does not work, paste this link into your browser:</p>
+    <p>This verification link will expire on ${formattedExpiry}.</p>
+    <p>If the button doesn’t work, copy and paste the following link into your browser:</p>
     <p><a href="${verificationUrl}">${verificationUrl}</a></p>
+    <p>If you need assistance, feel free to contact our support team.</p>
+    <p>Thank you for choosing Remembly.</p>
+    <p><strong>The Remembly Team</strong></p>
+
   `;
 
   await sendEmail({
-    to: email,
+    to: user.email,
     subject,
     text,
     html,

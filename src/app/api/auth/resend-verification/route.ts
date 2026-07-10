@@ -28,7 +28,14 @@ export async function POST(request: NextRequest) {
     }
 
     const verificationToken = await createEmailVerificationToken(user.id);
-    await sendVerificationEmail(user.email, verificationToken);
+    await sendVerificationEmail(
+      {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      verificationToken
+    );
 
     return NextResponse.json(apiResponse(true, "Verification email sent."));
   } catch (error) {
