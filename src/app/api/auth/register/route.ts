@@ -5,6 +5,7 @@ import { apiResponse } from "@/utils/apiResponse";
 import { AppError } from "@/utils/AppError";
 import { registerUserSchema } from "@/validators/user";
 import { hashPassword } from "@/lib/password";
+import { createEmailVerificationToken, sendVerificationEmail } from "@/lib/verification";
 import { ZodError } from "zod";
 
 export async function POST(request: NextRequest) {
@@ -36,10 +37,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const verificationToken = await createEmailVerificationToken(user.id);
+    await sendVerificationEmail(user.email, verificationToken);
+
     logger.info(`User registered successfully: ${user.id}`);
 
     return NextResponse.json(
-      apiResponse(true, "User registered successfully", {
+      apiResponse(true, "User registered successfully. Please check your email to verify your account.", {
         id: user.id,
         email: user.email,
         firstName: user.firstName,

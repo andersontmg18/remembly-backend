@@ -23,6 +23,7 @@ model User {
   lastLoginAt       DateTime? @map("last_login_at")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
+  verificationTokens VerificationToken[]
 
   @@map("users")
 }
@@ -30,4 +31,16 @@ model User {
 model HealthCheck {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
+}
+
+model VerificationToken {
+  id        Int      @id @default(autoincrement())
+  userid    Int
+  token     String   @unique
+  type      String
+  expireat  DateTime
+  createdat DateTime @default(now())
+  user      User     @relation(fields: [userid], references: [id])
+
+  @@map("verificationtoken")
 }
