@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
       throw new AppError("Please verify your email before logging in", 403);
     }
 
+    // FrontendUpdate -> will be updated by the front end login the frontend feature 
+    // need to collect the correct time zone of user and default language to 
+    // save during this sign in.
     if (!user.userPreference) {
       await prisma.userPreference.create({
         data: buildDefaultUserPreferenceData(user.id),
