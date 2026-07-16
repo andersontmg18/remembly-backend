@@ -13,19 +13,34 @@ enum UserRole {
 }
 
 model User {
-  id                Int       @id @default(autoincrement())
-  email             String    @unique @db.VarChar(255)
-  passwordHash      String    @map("password_hash") @db.VarChar(255)
-  firstName         String    @map("first_name") @db.VarChar(100)
-  lastName          String    @map("last_name") @db.VarChar(100)
-  isEmailVerified   Boolean   @default(false) @map("is_email_verified")
-  role              UserRole  @default(USER)
-  lastLoginAt       DateTime? @map("last_login_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  verificationTokens VerificationToken[]
+  id                  Int                 @id @default(autoincrement())
+  email               String              @unique @db.VarChar(255)
+  passwordHash        String              @map("password_hash") @db.VarChar(255)
+  firstName           String              @map("first_name") @db.VarChar(100)
+  lastName            String              @map("last_name") @db.VarChar(100)
+  isEmailVerified    Boolean             @default(false) @map("is_email_verified")
+  role                UserRole            @default(USER)
+  lastLoginAt         DateTime?           @map("last_login_at")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+  verificationTokens  VerificationToken[]
+  userPreference      UserPreference?
 
   @@map("users")
+}
+
+model UserPreference {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @unique @map("user_id")
+  timezone          String   @default("UTC") @db.VarChar(64)
+  language          String   @default("en") @db.VarChar(16)
+  emailNotification Boolean  @default(true) @map("email_notification")
+  pushNotification  Boolean  @default(true) @map("push_notification")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
 }
 
 model HealthCheck {

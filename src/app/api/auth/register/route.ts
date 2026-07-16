@@ -6,6 +6,7 @@ import { AppError } from "@/utils/AppError";
 import { registerUserSchema } from "@/validators/user";
 import { hashPassword } from "@/lib/password";
 import { createEmailVerificationToken, sendVerificationEmail } from "@/lib/verification";
+import { buildDefaultUserPreferenceCreateData } from "@/lib/userPreference";
 import { ZodError } from "zod";
 
 export async function POST(request: NextRequest) {
@@ -34,6 +35,9 @@ export async function POST(request: NextRequest) {
         passwordHash: hashedPassword,
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,
+        userPreference: {
+          create: buildDefaultUserPreferenceCreateData(),
+        },
       },
     });
 
