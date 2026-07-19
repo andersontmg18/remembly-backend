@@ -6,7 +6,9 @@ import { AppError } from "@/utils/AppError";
 import { comparePasswords } from "@/lib/password";
 import { loginUserSchema } from "@/validators/user";
 import { buildDefaultUserPreferenceData } from "@/lib/userPreference";
+import { createOpaqueRefreshToken, getRefreshTokenTTL, signAccessToken } from "@/lib/auth/jwt";
 import { ZodError } from "zod";
+import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,9 +42,42 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const now = new Date();
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        status: "ACTIVE",
+        createdAt: now,
+        lastUsedAt: now,
+        idleExpiresAt: new Date(now.getTime() + 15 * 60 * 1000),
+        absoluteExpiresAt: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+        userAgent: request.headers.get("user-agent") ?? undefined,
+        ipAddress: request.headers.get("x-forwarded-for") ?? undefined,
+        deviceName: "Unknown device",
+      },
+    });
+
+    const refreshTokenValue = createOpaqueRefreshToken();
+    const refreshToken = await prisma.refreshToken.create({
+      data: {
+        sessionId: session.id,
+        tokenHash: crypto.createHash("sha256").update(refreshTokenValue).digest("hex"),
+        familyId: crypto.randomUUID(),
+        sequence: 1,
+        createdAt: now,
+        expiresAt: new Date(now.getTime() + getRefreshTokenTTL()),
+      },
+    });
+
+    const accessToken = signAccessToken({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
     await prisma.user.update({
       where: { id: user.id },
-      data: { lastLoginAt: new Date() },
+      data: { lastLoginAt: now },
     });
 
     logger.info(`User logged in successfully: ${user.id}`);
@@ -57,7 +92,10 @@ export async function POST(request: NextRequest) {
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        lastLoginAt: new Date(),
+        lastLoginAt: now,
+        accessToken,
+        refreshToken: refreshTokenValue,
+        sessionId: session.id,
       }),
       { status: 200 }
     );
