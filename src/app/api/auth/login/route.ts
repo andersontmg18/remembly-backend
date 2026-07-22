@@ -24,6 +24,10 @@ export async function POST(request: NextRequest) {
       throw new AppError("Invalid email or password", 401);
     }
 
+    if (!user.passwordHash) {
+      throw new AppError("This account uses Google sign-in. Please use Google login.", 401);
+    }
+
     const isPasswordValid = await comparePasswords(validatedData.password, user.passwordHash);
     if (!isPasswordValid) {
       throw new AppError("Invalid email or password", 401);

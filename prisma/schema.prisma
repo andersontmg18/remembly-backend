@@ -22,7 +22,7 @@ enum SessionStatus {
 model User {
   id                  Int                 @id @default(autoincrement())
   email               String              @unique @db.VarChar(255)
-  passwordHash        String              @map("password_hash") @db.VarChar(255)
+  passwordHash        String?             @map("password_hash") @db.VarChar(255)
   firstName           String              @map("first_name") @db.VarChar(100)
   lastName            String              @map("last_name") @db.VarChar(100)
   isEmailVerified    Boolean             @default(false) @map("is_email_verified")
@@ -33,8 +33,22 @@ model User {
   verificationTokens  VerificationToken[]
   userPreference      UserPreference?
   sessions            Session[]
+  userProviders       UserProvider[]
 
   @@map("users")
+}
+
+model UserProvider {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @map("user_id")
+  provider       String   @db.VarChar(50)
+  providerUserId String   @map("provider_user_id") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("user_providers")
 }
 
 model Session {
