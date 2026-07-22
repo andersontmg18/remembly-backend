@@ -21,7 +21,7 @@ type GoogleProfile = {
 
 export function getGoogleOAuthUrl() {
   const clientId = env.GOOGLE_CLIENT_ID;
-  const redirectUri = env.GOOGLE_REDIRECT_URI ?? "http://localhost:3000/api/auth/google/callback";
+  const redirectUri = env.GOOGLE_REDIRECT_URI;
 
   if (!clientId) {
     throw new Error("GOOGLE_CLIENT_ID is not configured");
@@ -36,7 +36,7 @@ export function getGoogleOAuthUrl() {
 async function exchangeGoogleCodeForToken(code: string) {
   const clientId = env.GOOGLE_CLIENT_ID;
   const clientSecret = env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = env.GOOGLE_REDIRECT_URI ?? "http://localhost:3000/api/auth/google/callback";
+  const redirectUri = env.GOOGLE_REDIRECT_URI;
 
   if (!clientId || !clientSecret) {
     throw new AppError("Google OAuth is not configured", 500);
